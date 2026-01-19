@@ -1,30 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   raw_socket.c                                       :+:      :+:    :+:   */
+/*   icmp.h                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/01/19 18:08:54 by insub             #+#    #+#             */
-/*   Updated: 2026/01/19 18:18:15 by insub            ###   ########.fr       */
+/*   Created: 2026/01/19 19:01:28 by insub             #+#    #+#             */
+/*   Updated: 2026/01/19 19:27:49 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdio.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
+#ifndef ICMP_H
+# define ICMP_H
 
-#include "raw_socket.h"
+int		send_icmp_echo_request(int sockfd, const char *ip_addr);
+int		receive_icmp_echo_reply(int sockfd, char *buffer, int buf_size);
+void	process_icmp_reply(const char *buffer, int length);
 
-int	create_icmp_socket(void)
-{
-	int	sockfd;
+unsigned short	calculate_checksum(unsigned short *buf, int len);
 
-	sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
-	if (sockfd < 0)
-	{
-		perror("socket");
-		return (-1);
-	}
-	return (sockfd);
-}
+#endif

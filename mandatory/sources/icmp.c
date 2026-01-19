@@ -6,7 +6,7 @@
 /*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 19:01:20 by insub             #+#    #+#             */
-/*   Updated: 2026/01/19 19:40:52 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/19 19:45:00 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,17 +67,15 @@ int		receive_icmp_echo_reply(int sockfd, char *buffer, int buf_size)
 void	process_icmp_reply(const char *buffer, int length)
 {
     struct iphdr *ip_hdr;
-    int ip_hdr_len;
     struct icmphdr *icmp_hdr;
 
-    if (length < sizeof(struct iphdr) + sizeof(struct icmphdr))
+    if ((unsigned int)length < sizeof(struct iphdr) + sizeof(struct icmphdr))
     {
         printf("Received packet is too short\n");
         return;
     }
     
     ip_hdr = (struct iphdr *)buffer;
-    ip_hdr_len = ip_hdr->ihl * 4;  // IP 헤더 길이 (보통 20바이트)
 
     icmp_hdr = (struct icmphdr *)buffer;
     if (icmp_hdr->type == ICMP_ECHOREPLY)

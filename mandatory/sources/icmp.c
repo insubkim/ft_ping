@@ -6,7 +6,7 @@
 /*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 19:01:20 by insub             #+#    #+#             */
-/*   Updated: 2026/01/19 19:46:54 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/19 19:50:11 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ int		send_icmp_echo_request(int sockfd, const char *ip_addr)
     
     icmp_hdr.type = ICMP_ECHO;
     icmp_hdr.code = 0;
+    icmp_hdr.checksum = 0;
     icmp_hdr.un.echo.id = getpid() & 0xFFFF;
     icmp_hdr.un.echo.sequence = 0;
     icmp_hdr.checksum = calculate_checksum((unsigned short *)&icmp_hdr, sizeof(icmp_hdr));
@@ -77,9 +78,9 @@ void	process_icmp_reply(const char *buffer, int length)
     }
     
     ip_hdr = (struct iphdr *)buffer;
-    ip_hdr_len = ip_hdr->ihl * 4;  // IP Çì´õ ±æÀÌ (º¸Åë 20¹ÙÀÌÆ®)
+    ip_hdr_len = ip_hdr->ihl * 4;  // IP ï¿½ï¿½ï¿? ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ 20ï¿½ï¿½ï¿½ï¿½Æ®)
 
-    icmp_hdr = (struct icmphdr *)buffer + ip_hdr_len;
+    icmp_hdr = (struct icmphdr *)(buffer + ip_hdr_len);
     if (icmp_hdr->type == ICMP_ECHOREPLY)
     {
         printf("Received ICMP Echo Reply\n");

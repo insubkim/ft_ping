@@ -6,7 +6,7 @@
 /*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 19:01:20 by insub             #+#    #+#             */
-/*   Updated: 2026/01/19 19:29:30 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/19 19:40:52 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <sys/socket.h>
 #include <netdb.h>
-#include <icmp.h>
+#include <netinet/ip_icmp.h>
 
 #include "icmp.h"
 
@@ -53,13 +53,49 @@ int		send_icmp_echo_request(int sockfd, const char *ip_addr)
 
 int		receive_icmp_echo_reply(int sockfd, char *buffer, int buf_size)
 {
+    ssize_t length;
+    length = recvfrom(sockfd, buffer, buf_size, 0, NULL, NULL);
+    if (length < 0)
+    {
+        perror("receive_icmp_echo_reply - recvfrom");
+        return (-1);
+    }
     
-    return (0);
+    return ((int)length);
 }
 
 void	process_icmp_reply(const char *buffer, int length)
 {
+    struct iphdr *ip_hdr;
+    int ip_hdr_len;
+    struct icmphdr *icmp_hdr;
+
+    if (length < sizeof(struct iphdr) + sizeof(struct icmphdr))
+    {
+        printf("Received packet is too short\n");
+        return;
+    }
     
+    ip_hdr = (struct iphdr *)buffer;
+    ip_hdr_len = ip_hdr->ihl * 4;  // IP 헤더 길이 (보통 20바이트)
+
+    icmp_hdr = (struct icmphdr *)buffer;
+    if (icmp_hdr->type == ICMP_ECHOREPLY)
+    {
+        printf("Received ICMP Echo Reply\n");
+    }
+    else
+    {
+        printf("Received non-echo reply ICMP packet\n");
+    }
+
+    printf("type : %d\n", icmp_hdr->type);
+    printf("code : %d\n", icmp_hdr->code);
+    printf("checksum : %0x%04x\n", icmp_hdr->checksum);
+    printf("id : %d\n", icmp_hdr->un.echo.id);
+    printf("sequence : %d\n", icmp_hdr->un.echo.sequence);
+    printf("\n");
+
 }
 
 unsigned short	calculate_checksum(unsigned short *buf, int len)

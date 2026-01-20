@@ -6,7 +6,7 @@
 /*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 19:01:20 by insub             #+#    #+#             */
-/*   Updated: 2026/01/20 19:00:09 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/20 19:05:50 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ void	process_icmp_reply(const char *buffer, int length)
         printf("Received non-echo reply ICMP packet\n");
     }
 
-    printf("type : %d\n", icmp_hdr->type);
+    printf("type : %d (%s)\n", icmp_hdr->type, icmp_type_to_string(icmp_hdr->type)  );
     printf("code : %d\n", icmp_hdr->code);
     printf("checksum : %0x\n", icmp_hdr->checksum);
     printf("id : %d\n", icmp_hdr->un.echo.id);
@@ -99,19 +99,37 @@ void	process_icmp_reply(const char *buffer, int length)
 
 }
 
-int set_socket_timeout(int sockfd, int timeout_sec)
+char *icmp_type_to_string(int type)
 {
-    struct timeval timeout;
-    timeout.tv_sec = timeout_sec;
-    timeout.tv_usec = 0;
-
-    if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char *)&timeout, sizeof(timeout)) < 0)
+    switch (type)
     {
-        perror("set_socket_timeout - setsockopt");
-        return (-1);
+        case ICMP_ECHOREPLY:
+            return "Echo Reply";
+        case ICMP_DEST_UNREACH:
+            return "Destination Unreachable";
+        case ICMP_SOURCE_QUENCH:
+            return "Source Quench";
+        case ICMP_REDIRECT:
+            return "Redirect";
+        case ICMP_ECHO:
+            return "Echo Request";
+        case ICMP_TIME_EXCEEDED:
+            return "Time Exceeded";
+        case ICMP_PARAMETERPROB:
+            return "Parameter Problem";
+        case ICMP_TIMESTAMP:
+            return "Timestamp Request";
+        case ICMP_TIMESTAMPREPLY:
+            return "Timestamp Reply";
+        case ICMP_INFO_REQUEST:
+            return "Information Request";
+        case ICMP_INFO_REPLY:
+            return "Information Reply";
+        default:
+            return "Unknown Type";
     }
-    return (0);
 }
+
 
 unsigned short	calculate_checksum(unsigned short *buf, int len)
 {

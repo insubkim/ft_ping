@@ -6,7 +6,7 @@
 /*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 18:06:04 by insub             #+#    #+#             */
-/*   Updated: 2026/01/19 19:31:45 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/20 18:59:58 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 int	main(int argc, char **argv)
 {
 	int		sockfd;
-	char	reply_buffer[BUFFER_SIZE];
+	char	reply_buffer[BUFFER_SIZE] = {0, };
 	int		length;
 
 	if (argc != 2)
@@ -34,6 +34,11 @@ int	main(int argc, char **argv)
 	if (sockfd < 0)
 	{
 		printf("Failed to create raw socket\n");
+		return (1);
+	}
+	if (set_socket_timeout(sockfd, 5) < 0)
+	{
+		close(sockfd);
 		return (1);
 	}
 	if (send_icmp_echo_request(sockfd, argv[1]) < 0)

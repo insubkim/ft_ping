@@ -6,7 +6,7 @@
 /*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 19:01:20 by insub             #+#    #+#             */
-/*   Updated: 2026/01/19 19:50:11 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/20 19:00:09 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ void	process_icmp_reply(const char *buffer, int length)
     }
     
     ip_hdr = (struct iphdr *)buffer;
-    ip_hdr_len = ip_hdr->ihl * 4;  // IP ���? ���� (���� 20����Ʈ)
+    ip_hdr_len = ip_hdr->ihl * 4;  // IP ���? ���� (���� 20����Ʈ)
 
     icmp_hdr = (struct icmphdr *)(buffer + ip_hdr_len);
     if (icmp_hdr->type == ICMP_ECHOREPLY)
@@ -97,6 +97,20 @@ void	process_icmp_reply(const char *buffer, int length)
     printf("sequence : %d\n", icmp_hdr->un.echo.sequence);
     printf("\n");
 
+}
+
+int set_socket_timeout(int sockfd, int timeout_sec)
+{
+    struct timeval timeout;
+    timeout.tv_sec = timeout_sec;
+    timeout.tv_usec = 0;
+
+    if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char *)&timeout, sizeof(timeout)) < 0)
+    {
+        perror("set_socket_timeout - setsockopt");
+        return (-1);
+    }
+    return (0);
 }
 
 unsigned short	calculate_checksum(unsigned short *buf, int len)

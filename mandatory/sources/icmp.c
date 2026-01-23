@@ -6,7 +6,7 @@
 /*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 19:01:20 by insub             #+#    #+#             */
-/*   Updated: 2026/01/20 19:05:50 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/23 17:11:15 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,6 @@ int		send_icmp_echo_request(int sockfd, const char *ip_addr)
     struct hostent *host;
     struct sockaddr_in dest_addr;
     struct icmphdr icmp_hdr;
-
-    host = gethostbyname(ip_addr);
     
     if (host == NULL)
     {
@@ -34,7 +32,7 @@ int		send_icmp_echo_request(int sockfd, const char *ip_addr)
 
     dest_addr.sin_family = AF_INET;
     dest_addr.sin_port = 0;
-    dest_addr.sin_addr = *(struct in_addr *)host->h_addr;
+    inet_pton(AF_INET, ip_addr, &dest_addr.sin_addr);
     
     icmp_hdr.type = ICMP_ECHO;
     icmp_hdr.code = 0;

@@ -6,7 +6,7 @@
 /*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/23 16:30:28 by insub             #+#    #+#             */
-/*   Updated: 2026/01/23 17:01:57 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/23 17:07:47 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,5 @@ typedef struct s_ping_stats
 void print_ping_summary(t_ping_stats ping_stats, char *hostname);
 
 void set_ping_start_time_ms(t_ping_stats *ping_stats);
-
-static int64_t	get_current_time_ms(void);
 
 #endif 

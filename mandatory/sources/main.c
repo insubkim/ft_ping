@@ -6,7 +6,7 @@
 /*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 18:06:04 by insub             #+#    #+#             */
-/*   Updated: 2026/01/23 17:04:42 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/23 17:06:45 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ int	main(int argc, char **argv)
 	set_ping_start_time_ms(&ping_stats);
 
 	{	
-		if (send_icmp_echo_request(sockfd, argv[1]) < 0)
+		if (send_icmp_echo_request(sockfd, ip_addr) < 0)
 		{
 			close(sockfd);
 			return (1);

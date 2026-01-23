@@ -6,13 +6,16 @@
 /*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 18:08:54 by insub             #+#    #+#             */
-/*   Updated: 2026/01/20 19:04:42 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/23 16:37:08 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdio.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netdb.h>
+#include <arpa/inet.h>
 
 #include "raw_socket.h"
 
@@ -42,4 +45,26 @@ int set_socket_timeout(int sockfd, int timeout_sec)
         return (-1);
     }
     return (0);
+}
+
+char	*hostname_to_ipv4_addr(const char *hostname)
+{
+	static char			ip_str[INET_ADDRSTRLEN];
+	struct addrinfo		hints;
+	struct addrinfo		*res;
+	struct sockaddr_in	*addr;
+
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_RAW;
+	if (getaddrinfo(hostname, NULL, &hints, &res) != 0)
+		return (NULL);
+	addr = (struct sockaddr_in *)res->ai_addr;
+	if (inet_ntop(AF_INET, &addr->sin_addr, ip_str, sizeof(ip_str)) == NULL)
+	{
+		freeaddrinfo(res);
+		return (NULL);
+	}
+	freeaddrinfo(res);
+	return (ip_str);
 }

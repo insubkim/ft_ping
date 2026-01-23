@@ -6,7 +6,7 @@
 /*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 18:06:04 by insub             #+#    #+#             */
-/*   Updated: 2026/01/20 18:59:58 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/23 16:40:36 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include "raw_socket.h"
 #include "icmp.h"
+#include "ping.h"
 
 #define BUFFER_SIZE 1024
 
@@ -23,13 +24,20 @@ int	main(int argc, char **argv)
 	int		sockfd;
 	char	reply_buffer[BUFFER_SIZE] = {0, };
 	int		length;
+	char	*ip_addr;
 
 	if (argc != 2)
 	{
-		printf("Usage: %s <IP_ADDRESS>\n", argv[0]);
+		printf(PING_USAGE);
 		return (1);
 	}
-	printf("Ping Start\n");
+	ip_addr = hostname_to_ipv4_addr(argv[1]);
+	if (ip_addr == NULL)
+	{
+		printf("ping: %s: Name or service not know\n", argv[1]);
+		return (1);
+	}
+	printf("PING %s (%s) 56(84) data bytes\n", argv[1], ip_addr);
 	sockfd = create_icmp_socket();
 	if (sockfd < 0)
 	{

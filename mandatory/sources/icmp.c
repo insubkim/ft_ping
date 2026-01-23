@@ -6,7 +6,7 @@
 /*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 19:01:20 by insub             #+#    #+#             */
-/*   Updated: 2026/01/23 17:11:15 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/23 17:16:54 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,20 +15,14 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <netinet/ip_icmp.h>
+#include <arpa/inet.h>
 
 #include "icmp.h"
 
 int		send_icmp_echo_request(int sockfd, const char *ip_addr)
 {
-    struct hostent *host;
     struct sockaddr_in dest_addr;
     struct icmphdr icmp_hdr;
-    
-    if (host == NULL)
-    {
-        perror("send_icmp_echo_request -gethostbyname");
-        return (-1);
-    }
 
     dest_addr.sin_family = AF_INET;
     dest_addr.sin_port = 0;

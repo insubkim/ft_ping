@@ -6,7 +6,7 @@
 /*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/23 16:52:04 by insub             #+#    #+#             */
-/*   Updated: 2026/01/23 17:03:57 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/23 17:13:42 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,14 @@
 
 #include "ping.h"
 
+static int64_t	get_current_time_ms(void);
+
 void print_ping_summary(t_ping_stats ping_stats, char *hostname)
 {
     int64_t milliseconds = get_current_time_ms();
 
     printf("\n--- %s ping statistics ---\n", hostname);
-    printf("%u packets transmitted, %u packets received, %.1f%% packet loss, time %ums\n",
+    printf("%u packets transmitted, %u packets received, %.1f%% packet loss, time %lums\n",
            ping_stats.packets_sent,
            ping_stats.packets_received,
            (ping_stats.packets_sent == 0) ? 0.0 :

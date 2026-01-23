@@ -6,7 +6,7 @@
 /*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/23 16:30:28 by insub             #+#    #+#             */
-/*   Updated: 2026/01/23 16:31:56 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/23 17:01:57 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,5 +31,23 @@
 "            --apple-time         # display current time\n"\
 "            --apple-print-id     # display echo ID\n"\
 "            --apple-print-req    # display echo request\n"
+
+typedef struct s_ping_stats
+{
+    unsigned int    packets_sent;
+    unsigned int    packets_received;
+    unsigned int    packets_lost;
+    unsigned int    ping_start_time_ms;
+    double          rtt_min;
+    double          rtt_max;
+    double          rtt_avg;
+    double          rtt_mdev;
+}				t_ping_stats;
+
+void print_ping_summary(t_ping_stats ping_stats, char *hostname);
+
+void set_ping_start_time_ms(t_ping_stats *ping_stats);
+
+static int64_t	get_current_time_ms(void);
 
 #endif 

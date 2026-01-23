@@ -6,7 +6,7 @@
 /*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 18:06:04 by insub             #+#    #+#             */
-/*   Updated: 2026/01/23 16:40:36 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/23 17:04:42 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,43 +25,57 @@ int	main(int argc, char **argv)
 	char	reply_buffer[BUFFER_SIZE] = {0, };
 	int		length;
 	char	*ip_addr;
+	t_ping_stats ping_stats = {0, };
 
 	if (argc != 2)
 	{
 		printf(PING_USAGE);
 		return (1);
 	}
+	
 	ip_addr = hostname_to_ipv4_addr(argv[1]);
 	if (ip_addr == NULL)
 	{
 		printf("ping: %s: Name or service not know\n", argv[1]);
 		return (1);
 	}
+	
 	printf("PING %s (%s) 56(84) data bytes\n", argv[1], ip_addr);
+	
 	sockfd = create_icmp_socket();
 	if (sockfd < 0)
 	{
 		printf("Failed to create raw socket\n");
 		return (1);
 	}
+	
 	if (set_socket_timeout(sockfd, 5) < 0)
 	{
 		close(sockfd);
 		return (1);
 	}
-	if (send_icmp_echo_request(sockfd, argv[1]) < 0)
-	{
-		close(sockfd);
-		return (1);
+	
+	set_ping_start_time_ms(&ping_stats);
+
+	{	
+		if (send_icmp_echo_request(sockfd, argv[1]) < 0)
+		{
+			close(sockfd);
+			return (1);
+		}
+		
+		length = receive_icmp_echo_reply(sockfd, reply_buffer, BUFFER_SIZE);
+		if (length < 0)
+		{
+			close(sockfd);
+			return (1);
+		}
+		
+		process_icmp_reply(reply_buffer, length);
 	}
-	length = receive_icmp_echo_reply(sockfd, reply_buffer, BUFFER_SIZE);
-	if (length < 0)
-	{
-		close(sockfd);
-		return (1);
-	}
-	process_icmp_reply(reply_buffer, length);
-	printf("Ping End\n");
+
+	print_ping_summary(ping_stats, argv[1]);
+	
 	close(sockfd);
 	return (0);
 }

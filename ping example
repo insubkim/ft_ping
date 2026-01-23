@@ -1,0 +1,9 @@
+[root@3dde15d53b5f ft_ping]# ping 8.8.8.8
+PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
+64 bytes from 8.8.8.8: icmp_seq=1 ttl=63 time=43.5 ms
+64 bytes from 8.8.8.8: icmp_seq=2 ttl=63 time=39.1 ms
+^C
+--- 8.8.8.8 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1008ms
+rtt min/avg/max/mdev = 39.065/41.278/43.492/2.222 ms
+[root@3dde15d53b5f ft_ping]#

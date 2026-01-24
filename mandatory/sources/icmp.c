@@ -6,7 +6,7 @@
 /*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 19:01:20 by insub             #+#    #+#             */
-/*   Updated: 2026/01/23 17:29:27 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/24 17:46:05 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 #include <arpa/inet.h>
 
 #include "icmp.h"
+#include "ping.h"
 
 #define ICMP_HDR_SIZE	8
 #define ICMP_DATA_SIZE	56
@@ -86,11 +87,12 @@ int		receive_icmp_echo_reply(int sockfd, char *buffer, int buf_size)
     return ((int)length);
 }
 
-void	process_icmp_reply(const char *buffer, int length)
+void	process_icmp_reply(const char *buffer, int length, t_ping_stats *ping_stats, unsigned int ping_start_time_micro)
 {
     struct iphdr *ip_hdr;
     int ip_hdr_len;
     struct icmphdr *icmp_hdr;
+    int64_t milliseconds;
 
     if ((unsigned int)length < sizeof(struct iphdr) + sizeof(struct icmphdr))
     {
@@ -99,25 +101,32 @@ void	process_icmp_reply(const char *buffer, int length)
     }
     
     ip_hdr = (struct iphdr *)buffer;
-    ip_hdr_len = ip_hdr->ihl * 4;  // IP ���? ���� (���� 20����Ʈ)
+    ip_hdr_len = ip_hdr->ihl * 4;  
 
     icmp_hdr = (struct icmphdr *)(buffer + ip_hdr_len);
+
+    // set ping initial time
+    if (ping_stats->ping_start_time_ms == 0)
+    {
+        ping_stats->ping_start_time_ms = ping_start_time_micro / 1000;
+    }
+    ping_stats->packets_sent++;
     if (icmp_hdr->type == ICMP_ECHOREPLY)
     {
-        printf("Received ICMP Echo Reply\n");
+        ping_stats->packets_received++;
+        ping_stats->packets_lost = ping_stats->packets_sent - ping_stats->packets_received;
     }
     else
     {
         printf("Received non-echo reply ICMP packet\n");
     }
 
-    printf("type : %d (%s)\n", icmp_hdr->type, icmp_type_to_string(icmp_hdr->type)  );
-    printf("code : %d\n", icmp_hdr->code);
-    printf("checksum : %0x\n", icmp_hdr->checksum);
-    printf("id : %d\n", icmp_hdr->un.echo.id);
-    printf("sequence : %d\n", icmp_hdr->un.echo.sequence);
-    printf("\n");
-
+    int64_t microseconds = get_current_time_micro();
+    printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n", length - ip_hdr_len,
+           inet_ntoa(*(struct in_addr *)&ip_hdr->saddr),
+           ntohs(icmp_hdr->un.echo.sequence),
+           ip_hdr->ttl,
+           microseconds - ping_start_time_micro / 1000.0);
 }
 
 char *icmp_type_to_string(int type)

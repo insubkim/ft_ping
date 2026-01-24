@@ -6,7 +6,7 @@
 /*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/23 16:52:04 by insub             #+#    #+#             */
-/*   Updated: 2026/01/23 17:13:42 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/24 17:44:42 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ void print_ping_summary(t_ping_stats ping_stats, char *hostname)
            ping_stats.packets_sent,
            ping_stats.packets_received,
            (ping_stats.packets_sent == 0) ? 0.0 :
-           ((ping_stats.packets_sent - ping_stats.packets_received) * 100.0) / ping_stats.packets_sent,
+           ((ping_stats.packets_lost) * 100.0) / ping_stats.packets_sent,
            milliseconds - ping_stats.ping_start_time_ms);
     
     if (ping_stats.packets_received == 0)
@@ -40,16 +40,10 @@ void print_ping_summary(t_ping_stats ping_stats, char *hostname)
            ping_stats.rtt_mdev);
 }
 
-void set_ping_start_time_ms(t_ping_stats *ping_stats)
-{
-    ping_stats->ping_start_time_ms = (unsigned int)get_current_time_ms();
-}
-
-
-static int64_t	get_current_time_ms(void)
+int64_t	get_current_time_micro(void)
 {
 	struct timespec	spec;
 
 	clock_gettime(CLOCK_REALTIME, &spec);
-	return ((int64_t)spec.tv_sec * 1000 + (int64_t)spec.tv_nsec / 1000000);
+	return ((int64_t)spec.tv_sec * 1000000 + (int64_t)spec.tv_nsec / 1000);
 }

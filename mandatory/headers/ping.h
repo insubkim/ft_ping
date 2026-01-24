@@ -6,7 +6,7 @@
 /*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/23 16:30:28 by insub             #+#    #+#             */
-/*   Updated: 2026/01/24 17:18:15 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/24 17:44:57 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,6 @@ extern int	g_summary_flag;
 
 void print_ping_summary(t_ping_stats ping_stats, char *hostname);
 
-void set_ping_start_time_ms(t_ping_stats *ping_stats);
+int64_t	get_current_time_micro(void);
 
 #endif 

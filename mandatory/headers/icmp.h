@@ -6,7 +6,7 @@
 /*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 19:01:28 by insub             #+#    #+#             */
-/*   Updated: 2026/01/20 19:04:51 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/24 17:45:25 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 int		send_icmp_echo_request(int sockfd, const char *ip_addr);
 int		receive_icmp_echo_reply(int sockfd, char *buffer, int buf_size);
-void	process_icmp_reply(const char *buffer, int length);
+void	process_icmp_reply(const char *buffer, int length, t_ping_stats *ping_stats, unsigned int ping_start_time_micro);
 
 unsigned short	calculate_checksum(unsigned short *buf, int len);
 

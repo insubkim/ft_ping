@@ -6,7 +6,7 @@
 /*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 18:06:04 by insub             #+#    #+#             */
-/*   Updated: 2026/01/24 17:23:32 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/24 17:45:25 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,11 +56,12 @@ int	main(int argc, char **argv)
 		close(sockfd);
 		return (1);
 	}
-	
-	set_ping_start_time_ms(&ping_stats);
 
 	 while (g_summary_flag == 0)
-	 {	
+	 {
+	    unsigned int    ping_start_time_micro;
+		ping_start_time_micro = get_current_time_micro();
+
 		if (send_icmp_echo_request(sockfd, ip_addr) < 0)
 		{
 			close(sockfd);
@@ -74,7 +75,7 @@ int	main(int argc, char **argv)
 			return (1);
 		}
 		
-		process_icmp_reply(reply_buffer, length);
+		process_icmp_reply(reply_buffer, length, &ping_stats, ping_start_time_micro);
 		sleep(1);
 	}
 

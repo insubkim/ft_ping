@@ -6,7 +6,7 @@
 /*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 18:06:04 by insub             #+#    #+#             */
-/*   Updated: 2026/01/24 17:18:32 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/24 17:23:32 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,7 @@ int	main(int argc, char **argv)
 		}
 		
 		process_icmp_reply(reply_buffer, length);
+		sleep(1);
 	}
 
 	print_ping_summary(ping_stats, argv[1]);

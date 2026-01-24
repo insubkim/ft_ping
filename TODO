@@ -1,0 +1,10 @@
+1. 요청 반복문으로 만들기
+
+2. ctrl c 시그널 핸들러 만들기
+
+3. 통계 정보 출력 부분 추가
+
+4.  -v -? 옵션 추가하기
+
+5. You will have to manage FQDN without doing the DNS resolution in the packet
+return ???

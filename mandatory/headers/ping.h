@@ -6,7 +6,7 @@
 /*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/23 16:30:28 by insub             #+#    #+#             */
-/*   Updated: 2026/01/23 17:16:33 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/24 17:18:15 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,8 @@ typedef struct s_ping_stats
     double          rtt_avg;
     double          rtt_mdev;
 }				t_ping_stats;
+
+extern int	g_summary_flag;
 
 void print_ping_summary(t_ping_stats ping_stats, char *hostname);
 

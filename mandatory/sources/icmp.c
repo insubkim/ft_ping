@@ -6,7 +6,7 @@
 /*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 19:01:20 by insub             #+#    #+#             */
-/*   Updated: 2026/01/26 03:29:21 by root             ###   ########.fr       */
+/*   Updated: 2026/01/26 04:22:21 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
 #include <arpa/inet.h>
+#include <math.h>
 
 #include "icmp.h"
 #include "ping.h"
@@ -104,6 +105,8 @@ void	process_icmp_reply(const char *buffer, int length, t_ping_stats *ping_stats
 
     icmp_hdr = (struct icmphdr *)(buffer + ip_hdr_len);
 
+    int64_t microseconds = get_current_time_micro();
+
     // set ping initial time
     if (ping_stats->ping_start_time_ms == 0)
     {
@@ -114,13 +117,30 @@ void	process_icmp_reply(const char *buffer, int length, t_ping_stats *ping_stats
     {
         ping_stats->packets_received++;
         ping_stats->packets_lost = ping_stats->packets_sent - ping_stats->packets_received;
+
+        // RTT calculation
+        int64_t rtt = microseconds - ping_start_time_micro;
+        double rtt_ms = rtt / 1000.0;
+        if (ping_stats->rtt_min == 0 || rtt_ms < ping_stats->rtt_min)
+            ping_stats->rtt_min = rtt_ms;
+        if (rtt_ms > ping_stats->rtt_max)
+            ping_stats->rtt_max = rtt_ms;
+
+
+        // 추가된 표본으로 새로운 평균 계산
+        double delta = rtt_ms - ping_stats->rtt_avg;
+        ping_stats->rtt_avg += delta / ping_stats->packets_received;
+        
+        // 새로운 평균으로부터 얼마나 떨어져있는지 계산
+        double delta2 = rtt_ms - ping_stats->rtt_avg;
+        ping_stats->rtt_ss += delta * delta2;
+        ping_stats->rtt_mdev = sqrt(ping_stats->rtt_ss / ping_stats->packets_received);    
     }
     else
     {
         printf("Received non-echo reply ICMP packet\n");
     }
 
-    int64_t microseconds = get_current_time_micro();
     printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n", length - ip_hdr_len,
            inet_ntoa(*(struct in_addr *)&ip_hdr->saddr),
            ntohs(icmp_hdr->un.echo.sequence),

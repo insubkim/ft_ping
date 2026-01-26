@@ -6,7 +6,7 @@
 /*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/23 16:30:28 by insub             #+#    #+#             */
-/*   Updated: 2026/01/26 03:01:05 by root             ###   ########.fr       */
+/*   Updated: 2026/01/26 04:13:36 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,11 +31,12 @@ typedef struct s_ping_stats
     unsigned int    packets_sent;
     unsigned int    packets_received;
     unsigned int    packets_lost;
-    unsigned int    ping_start_time_ms;
+    int64_t         ping_start_time_ms;
     double          rtt_min;
     double          rtt_max;
     double          rtt_avg;
     double          rtt_mdev;
+    double          rtt_ss; // 제곱 편차 합. rtt_mdev 계산용.  
 }				t_ping_stats;
 
 extern int	g_summary_flag;

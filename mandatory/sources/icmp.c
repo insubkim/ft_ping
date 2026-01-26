@@ -6,7 +6,7 @@
 /*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 19:01:20 by insub             #+#    #+#             */
-/*   Updated: 2026/01/26 03:01:22 by root             ###   ########.fr       */
+/*   Updated: 2026/01/26 03:29:21 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,7 @@ int		receive_icmp_echo_reply(int sockfd, char *buffer, int buf_size)
     return ((int)length);
 }
 
-void	process_icmp_reply(const char *buffer, int length, t_ping_stats *ping_stats, unsigned int ping_start_time_micro)
+void	process_icmp_reply(const char *buffer, int length, t_ping_stats *ping_stats, int64_t ping_start_time_micro)
 {
     struct iphdr *ip_hdr;
     int ip_hdr_len;
@@ -125,7 +125,7 @@ void	process_icmp_reply(const char *buffer, int length, t_ping_stats *ping_stats
            inet_ntoa(*(struct in_addr *)&ip_hdr->saddr),
            ntohs(icmp_hdr->un.echo.sequence),
            ip_hdr->ttl,
-           microseconds - ping_start_time_micro / 1000.0);
+           (microseconds - ping_start_time_micro) / 1000.0);
 }
 
 char *icmp_type_to_string(int type)

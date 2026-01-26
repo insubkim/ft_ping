@@ -6,7 +6,7 @@
 /*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 18:06:04 by insub             #+#    #+#             */
-/*   Updated: 2026/01/26 03:08:26 by root             ###   ########.fr       */
+/*   Updated: 2026/01/26 03:30:02 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ int	main(int argc, char **argv)
 
 	 while (g_summary_flag == 0)
 	 {
-	    unsigned int    ping_start_time_micro;
+	    int64_t	ping_start_time_micro;
 		ping_start_time_micro = get_current_time_micro();
 
 		if (send_icmp_echo_request(sockfd, ip_addr) < 0)

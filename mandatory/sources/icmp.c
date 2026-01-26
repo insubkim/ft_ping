@@ -146,16 +146,6 @@ void	process_icmp_reply(const char *buffer, int length, t_ping_stats *ping_stats
            ntohs(icmp_hdr->un.echo.sequence),
            ip_hdr->ttl,
            (microseconds - ping_start_time_micro) / 1000.0);
-
-    if (g_options.verbose)
-    {
-        printf("  ICMP: type=%d (%s), code=%d, id=%d, seq=%d\n",
-               icmp_hdr->type,
-               icmp_type_to_string(icmp_hdr->type),
-               icmp_hdr->code,
-               ntohs(icmp_hdr->un.echo.id),
-               ntohs(icmp_hdr->un.echo.sequence));
-    }
 }
 
 char *icmp_type_to_string(int type)

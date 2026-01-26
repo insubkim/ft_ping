@@ -54,21 +54,28 @@ int	main(int argc, char **argv)
 	if (arg_index < 0)
 		return (0);
 
-	ip_addr = hostname_to_ipv4_addr(argv[arg_index]);
-	if (ip_addr == NULL)
-	{
-		printf("ping: %s: Name or service not know\n", argv[arg_index]);
-		return (1);
-	}
-	
-	printf("PING %s (%s) 56(84) data bytes\n", argv[arg_index], ip_addr);
-	
 	sockfd = create_icmp_socket();
 	if (sockfd < 0)
 	{
 		printf("Failed to create raw socket\n");
 		return (1);
 	}
+
+	if (g_options.verbose)
+		printf("ping: sock4.fd: %d (socktype: SOCK_RAW), hints.ai_family: AF_INET\n\n", sockfd);
+
+	ip_addr = hostname_to_ipv4_addr(argv[arg_index]);
+	if (ip_addr == NULL)
+	{
+		printf("ping: %s: Name or service not know\n", argv[arg_index]);
+		close(sockfd);
+		return (1);
+	}
+
+	if (g_options.verbose)
+		printf("ai->ai_family: AF_INET, ai->ai_canonname: '%s'\n", argv[arg_index]);
+
+	printf("PING %s (%s) 56(84) data bytes\n", argv[arg_index], ip_addr);
 	
 	if (set_socket_timeout(sockfd, 5) < 0)
 	{

@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 18:06:04 by insub             #+#    #+#             */
-/*   Updated: 2026/01/26 03:30:02 by root             ###   ########.fr       */
+/*   Updated: 2026/01/26 13:56:08 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <unistd.h>
 #include <stdio.h>
+#include <getopt.h>
 
 #include "raw_socket.h"
 #include "icmp.h"
@@ -21,6 +22,24 @@
 #define BUFFER_SIZE 1024
 
 int g_summary_flag = 0;
+t_ping_options	g_options = {0};
+
+static int	parse_options(int argc, char **argv)
+{
+	int	opt;
+
+	while ((opt = getopt(argc, argv, "v?")) != -1)
+	{
+		if (opt == 'v')
+			g_options.verbose = 1;
+		else if (opt == '?')
+		{
+			printf(PING_HELP);
+			return (-1);
+		}
+	}
+	return (optind);
+}
 
 int	main(int argc, char **argv)
 {
@@ -29,21 +48,20 @@ int	main(int argc, char **argv)
 	int		length;
 	char	*ip_addr;
 	t_ping_stats ping_stats = {0, };
+	int		arg_index;
 
-	if (argc != 2)
-	{
-		printf(PING_USAGE);
-		return (1);
-	}
-	
-	ip_addr = hostname_to_ipv4_addr(argv[1]);
+	arg_index = parse_options(argc, argv);
+	if (arg_index < 0)
+		return (0);
+
+	ip_addr = hostname_to_ipv4_addr(argv[arg_index]);
 	if (ip_addr == NULL)
 	{
-		printf("ping: %s: Name or service not know\n", argv[1]);
+		printf("ping: %s: Name or service not know\n", argv[arg_index]);
 		return (1);
 	}
 	
-	printf("PING %s (%s) 56(84) data bytes\n", argv[1], ip_addr);
+	printf("PING %s (%s) 56(84) data bytes\n", argv[arg_index], ip_addr);
 	
 	sockfd = create_icmp_socket();
 	if (sockfd < 0)
@@ -82,7 +100,7 @@ int	main(int argc, char **argv)
 		sleep(1);
 	}
 
-	print_ping_summary(ping_stats, argv[1]);
+	print_ping_summary(ping_stats, argv[arg_index]);
 	
 	close(sockfd);
 	return (0);

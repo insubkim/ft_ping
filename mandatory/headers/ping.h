@@ -3,28 +3,33 @@
 /*                                                        :::      ::::::::   */
 /*   ping.h                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/23 16:30:28 by insub             #+#    #+#             */
-/*   Updated: 2026/01/26 04:13:36 by root             ###   ########.fr       */
+/*   Updated: 2026/01/26 13:52:58 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PING_H
 #define PING_H
 
-#define PING_USAGE \
-"Usage: ping [-aAbBdDfhLnOqrRUvV64] [-c count] [-i interval] [-I interface]\n"\
-"            [-m mark] [-M pmtudisc_option] [-l preload] [-p pattern] [-Q tos]\n"\
-"            [-s packetsize] [-S sndbuf] [-t ttl] [-T timestamp_option]\n"\
-"            [-w deadline] [-W timeout] [hop1 ...] destination\n"\
-"Usage: ping -6 [-aAbBdDfhLnOqrRUvV] [-c count] [-i interval] [-I interface]\n"\
-"             [-l preload] [-m mark] [-M pmtudisc_option]\n"\
-"             [-N nodeinfo_option] [-p pattern] [-Q tclass] [-s packetsize]\n"\
-"             [-S sndbuf] [-t ttl] [-T timestamp_option] [-w deadline]\n"\
-"             [-W timeout] destination\n"\
 
-#include <stdint.h> 
+#define PING_HELP \
+"\nUsage\n"\
+"  ping [options] <destination>\n"\
+"\nOptions:\n"\
+"  <destination>      dns name or ip address\n"\
+"  -v                 verbose output\n"\
+"  -?                 print help and exit\n"
+
+#include <stdint.h>
+
+typedef struct s_ping_options
+{
+	int		verbose;
+}	t_ping_options;
+
+extern t_ping_options	g_options; 
 
 typedef struct s_ping_stats
 {

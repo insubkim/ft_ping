@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
+/*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 18:06:04 by insub             #+#    #+#             */
-/*   Updated: 2026/01/26 13:56:08 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/26 05:32:29 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,10 +34,14 @@ static int	parse_options(int argc, char **argv)
 			g_options.verbose = 1;
 		else if (opt == '?')
 		{
-			printf(PING_HELP);
 			return (-1);
 		}
 	}
+
+	if ((g_options.verbose && argc < 3) 
+		|| (!g_options.verbose && argc < 2))
+		return (-1);
+
 	return (optind);
 }
 
@@ -52,7 +56,10 @@ int	main(int argc, char **argv)
 
 	arg_index = parse_options(argc, argv);
 	if (arg_index < 0)
+	{
+		printf(PING_HELP);
 		return (0);
+	}
 
 	sockfd = create_icmp_socket();
 	if (sockfd < 0)

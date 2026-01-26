@@ -5,16 +5,14 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            // ① [중요] Makefile 결과물 경로 (예: main.exe)
-            // Makefile 안에서 gcc -o main ... 이라고 했다면 아래와 같아야 함
-            "program": "${workspaceFolder}/ft_ping", 
+            "program": "${workspaceFolder}/ft_ping",
             "args": ["8.8.8.8"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
-            "miDebuggerPath": "gdb", // 윈도우라면 "C:/msys64/.../gdb.exe" 경로 확인 필요
+            "miDebuggerPath": "/usr/bin/gdb",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
@@ -22,8 +20,7 @@
                     "ignoreFailures": true
                 }
             ],
-            // ② [중요] 디버깅 시작 전 실행할 빌드 태스크 이름
-            "preLaunchTask": "makefile build" 
+            "preLaunchTask": "makefile build"
         }
     ]
 }

@@ -2,15 +2,29 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "makefile build",   // ① 이 작업의 이름 (기억해두세요)
+            "label": "makefile build",
             "type": "shell",
-            "command": "make",           // ② 실행할 명령어 (gcc 대신 make)
-            "args": [],                  // 필요하면 ["all"] 처럼 타겟 지정
+            "command": "make",
+            "args": [],
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
-            "problemMatcher": ["$gcc"]   // 에러 메시지 형식을 gcc 스타일로 파싱
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "makefile clean",
+            "type": "shell",
+            "command": "make",
+            "args": ["clean"],
+            "problemMatcher": []
+        },
+        {
+            "label": "makefile re",
+            "type": "shell",
+            "command": "make",
+            "args": ["re"],
+            "problemMatcher": ["$gcc"]
         }
     ]
 }

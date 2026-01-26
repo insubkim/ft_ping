@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   icmp.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
+/*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 19:01:20 by insub             #+#    #+#             */
-/*   Updated: 2026/01/24 17:46:05 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/26 03:01:22 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,6 @@ void	process_icmp_reply(const char *buffer, int length, t_ping_stats *ping_stats
     struct iphdr *ip_hdr;
     int ip_hdr_len;
     struct icmphdr *icmp_hdr;
-    int64_t milliseconds;
 
     if ((unsigned int)length < sizeof(struct iphdr) + sizeof(struct icmphdr))
     {

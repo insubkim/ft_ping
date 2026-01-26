@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
+/*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 18:06:04 by insub             #+#    #+#             */
-/*   Updated: 2026/01/24 17:45:25 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/26 03:08:26 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "raw_socket.h"
 #include "icmp.h"
 #include "ping.h"
+#include "signal_handler.h"
 
 #define BUFFER_SIZE 1024
 
@@ -56,6 +57,8 @@ int	main(int argc, char **argv)
 		close(sockfd);
 		return (1);
 	}
+
+	set_signal();
 
 	 while (g_summary_flag == 0)
 	 {

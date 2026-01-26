@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ping.h                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
+/*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/23 16:30:28 by insub             #+#    #+#             */
-/*   Updated: 2026/01/24 17:44:57 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/26 03:01:05 by root             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,8 @@
 "             [-N nodeinfo_option] [-p pattern] [-Q tclass] [-s packetsize]\n"\
 "             [-S sndbuf] [-t ttl] [-T timestamp_option] [-w deadline]\n"\
 "             [-W timeout] destination\n"\
+
+#include <stdint.h> 
 
 typedef struct s_ping_stats
 {

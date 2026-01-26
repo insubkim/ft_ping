@@ -49,12 +49,12 @@ bonus: | MAKE_BONUS
 MAKE_MAN: $(HDRS_DIR)*.h $(OBJS)
 		touch MAKE_MAN
 		rm -f MAKE_BONUS
-		cc $(OBJS) $(CFLAGS) -o $(NAME)
+		cc $(OBJS) $(CFLAGS) -lm -o $(NAME)
 		
 MAKE_BONUS: $(BONUS_HDRS_DIR)*.h $(BONUS_OBJS) 
 		touch MAKE_BONUS
 		rm -f MAKE_MAN
-		cc $(BONUS_OBJS) $(CFLAGS) -o $(NAME)
+		cc $(BONUS_OBJS) $(CFLAGS) -lm -o $(NAME)
 
 clean:
 	$(RM) $(OBJS_DIR) $(BONUS_OBJS_DIR)

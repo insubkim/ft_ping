@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   icmp.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: root <root@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 19:01:20 by insub             #+#    #+#             */
-/*   Updated: 2026/01/26 04:22:21 by root             ###   ########.fr       */
+/*   Updated: 2026/01/30 14:13:11 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,67 +90,201 @@ int		receive_icmp_echo_reply(int sockfd, char *buffer, int buf_size)
     return ((int)length);
 }
 
-int	process_icmp_reply(const char *buffer, int length, t_ping_stats *ping_stats, int64_t ping_start_time_micro)
+static const char	*get_dest_unreach_msg(int code)
 {
-    struct iphdr *ip_hdr;
-    int ip_hdr_len;
-    struct icmphdr *icmp_hdr;
-    uint16_t my_pid;
+	static const char *msgs[] = {
+		"Destination Net Unreachable",
+		"Destination Host Unreachable",
+		"Destination Protocol Unreachable",
+		"Destination Port Unreachable",
+		"Fragmentation needed and DF set",
+		"Source Route Failed",
+		"Destination Net Unknown",
+		"Destination Host Unknown",
+		"Source Host Isolated",
+		"Destination Net Administratively Prohibited",
+		"Destination Host Administratively Prohibited",
+		"Net Unreachable for TOS",
+		"Host Unreachable for TOS",
+		"Communication Administratively Prohibited",
+		"Host Precedence Violation",
+		"Precedence Cutoff in Effect"
+	};
 
-    if ((unsigned int)length < sizeof(struct iphdr) + sizeof(struct icmphdr))
-    {
-        printf("Received packet is too short\n");
-        return (-1);
-    }
+	if (code >= 0 && code <= 15)
+		return (msgs[code]);
+	return ("Destination Unreachable (Unknown Code)");
+}
 
-    ip_hdr = (struct iphdr *)buffer;
-    ip_hdr_len = ip_hdr->ihl * 4;
+static const char	*get_time_exceeded_msg(int code)
+{
+	if (code == 0)
+		return ("Time to live exceeded");
+	if (code == 1)
+		return ("Fragment reassembly time exceeded");
+	return ("Time Exceeded (Unknown Code)");
+}
 
-    icmp_hdr = (struct icmphdr *)(buffer + ip_hdr_len);
+static const char	*get_redirect_msg(int code)
+{
+	static const char *msgs[] = {
+		"Redirect for Network",
+		"Redirect for Host",
+		"Redirect for TOS and Network",
+		"Redirect for TOS and Host"
+	};
 
-    // Filter: only process ICMP Echo Reply
-    if (icmp_hdr->type != ICMP_ECHOREPLY)
-        return (0);
+	if (code >= 0 && code <= 3)
+		return (msgs[code]);
+	return ("Redirect (Unknown Code)");
+}
+
+static const char	*get_param_problem_msg(int code)
+{
+	if (code == 0)
+		return ("Parameter Problem: Pointer indicates error");
+	return ("Parameter Problem");
+}
+
+static int	is_our_packet(const char *buffer, int ip_hdr_len, int length)
+{
+	struct iphdr	*orig_ip_hdr;
+	struct icmphdr	*orig_icmp_hdr;
+	int				orig_ip_hdr_len;
+	uint16_t		my_pid;
+
+	if ((unsigned int)length < ip_hdr_len + 8 + sizeof(struct iphdr) + 8)
+		return (0);
+	orig_ip_hdr = (struct iphdr *)(buffer + ip_hdr_len + 8);
+	orig_ip_hdr_len = orig_ip_hdr->ihl * 4;
+	orig_icmp_hdr = (struct icmphdr *)(buffer + ip_hdr_len + 8 + orig_ip_hdr_len);
+	my_pid = htons(getpid() & 0xFFFF);
+	if (orig_icmp_hdr->un.echo.id != my_pid)
+		return (0);
+	return (1);
+}
+
+static const char	*get_error_msg(struct icmphdr *icmp_hdr)
+{
+	if (icmp_hdr->type == ICMP_DEST_UNREACH)
+		return (get_dest_unreach_msg(icmp_hdr->code));
+	else if (icmp_hdr->type == ICMP_TIME_EXCEEDED)
+		return (get_time_exceeded_msg(icmp_hdr->code));
+	else if (icmp_hdr->type == ICMP_SOURCE_QUENCH)
+		return ("Source Quench");
+	else if (icmp_hdr->type == ICMP_REDIRECT)
+		return (get_redirect_msg(icmp_hdr->code));
+	else if (icmp_hdr->type == ICMP_PARAMETERPROB)
+		return (get_param_problem_msg(icmp_hdr->code));
+	return (NULL);
+}
+
+static int	process_icmp_error(const char *buffer, int length,
+		struct iphdr *ip_hdr, struct icmphdr *icmp_hdr, int ip_hdr_len)
+{
+	struct iphdr	*orig_ip_hdr;
+	struct icmphdr	*orig_icmp_hdr;
+	int				orig_ip_hdr_len;
+	const char		*error_msg;
+
+	error_msg = get_error_msg(icmp_hdr);
+	if (error_msg == NULL)
+		return (0);
+	if (!is_our_packet(buffer, ip_hdr_len, length))
+		return (0);
+	orig_ip_hdr = (struct iphdr *)(buffer + ip_hdr_len + 8);
+	orig_ip_hdr_len = orig_ip_hdr->ihl * 4;
+	orig_icmp_hdr = (struct icmphdr *)(buffer + ip_hdr_len + 8 + orig_ip_hdr_len);
+	printf("From %s icmp_seq=%d %s\n",
+		inet_ntoa(*(struct in_addr *)&ip_hdr->saddr),
+		ntohs(orig_icmp_hdr->un.echo.sequence),
+		error_msg);
+	return (1);
+}
+
+static int	is_icmp_error(int type)
+{
+	return (type == ICMP_DEST_UNREACH
+		|| type == ICMP_TIME_EXCEEDED
+		|| type == ICMP_SOURCE_QUENCH
+		|| type == ICMP_REDIRECT
+		|| type == ICMP_PARAMETERPROB);
+}
+
+int	process_icmp_reply(const char *buffer, int length,
+		t_ping_stats *ping_stats, int64_t ping_start_time_micro)
+{
+	struct iphdr	*ip_hdr;
+	int				ip_hdr_len;
+	struct icmphdr	*icmp_hdr;
+	uint16_t		my_pid;
+	int64_t			microseconds;
+	int64_t			rtt;
+	double			rtt_ms;
+	double			delta;
+	double			delta2;
+
+	if ((unsigned int)length < sizeof(struct iphdr) + sizeof(struct icmphdr))
+		return (-1);
+	ip_hdr = (struct iphdr *)buffer;
+	ip_hdr_len = ip_hdr->ihl * 4;
+	icmp_hdr = (struct icmphdr *)(buffer + ip_hdr_len);
+
+	if (is_icmp_error(icmp_hdr->type))
+	{
+		if (process_icmp_error(buffer, length, ip_hdr, icmp_hdr, ip_hdr_len))
+		{
+			ping_stats->packets_sent++;
+			ping_stats->packets_lost++;
+			if (ping_stats->ping_start_time_ms == 0)
+				ping_stats->ping_start_time_ms = ping_start_time_micro / 1000;
+			return (1);
+		}
+		return (0);
+	}
+	if (icmp_hdr->type != ICMP_ECHOREPLY)
+		return (0);
 
     // Filter: check if this reply is for our ping (matching PID)
-    my_pid = htons(getpid() & 0xFFFF);
-    if (icmp_hdr->un.echo.id != my_pid)
-        return (0);
+	my_pid = htons(getpid() & 0xFFFF);
+	if (icmp_hdr->un.echo.id != my_pid)
+		return (0);
 
-    int64_t microseconds = get_current_time_micro();
+	microseconds = get_current_time_micro();
 
     // set ping initial time
-    if (ping_stats->ping_start_time_ms == 0)
+	if (ping_stats->ping_start_time_ms == 0)
     {
-        ping_stats->ping_start_time_ms = ping_start_time_micro / 1000;
+		ping_stats->ping_start_time_ms = ping_start_time_micro / 1000;
     }
-    ping_stats->packets_sent++;
-    ping_stats->packets_received++;
-    ping_stats->packets_lost = ping_stats->packets_sent - ping_stats->packets_received;
+	ping_stats->packets_sent++;
+	ping_stats->packets_received++;
+	ping_stats->packets_lost = ping_stats->packets_sent - ping_stats->packets_received;
 
     // RTT calculation
-    int64_t rtt = microseconds - ping_start_time_micro;
-    double rtt_ms = rtt / 1000.0;
-    if (ping_stats->rtt_min == 0 || rtt_ms < ping_stats->rtt_min)
-        ping_stats->rtt_min = rtt_ms;
-    if (rtt_ms > ping_stats->rtt_max)
-        ping_stats->rtt_max = rtt_ms;
-
+	rtt = microseconds - ping_start_time_micro;
+	rtt_ms = rtt / 1000.0;
+	if (ping_stats->rtt_min == 0 || rtt_ms < ping_stats->rtt_min)
+		ping_stats->rtt_min = rtt_ms;
+	if (rtt_ms > ping_stats->rtt_max)
+		ping_stats->rtt_max = rtt_ms;
+        
     // 추가된 표본으로 새로운 평균 계산
-    double delta = rtt_ms - ping_stats->rtt_avg;
-    ping_stats->rtt_avg += delta / ping_stats->packets_received;
+	delta = rtt_ms - ping_stats->rtt_avg;
+	ping_stats->rtt_avg += delta / ping_stats->packets_received;
 
     // 새로운 평균으로부터 얼마나 떨어져있는지 계산
-    double delta2 = rtt_ms - ping_stats->rtt_avg;
-    ping_stats->rtt_ss += delta * delta2;
-    ping_stats->rtt_mdev = sqrt(ping_stats->rtt_ss / ping_stats->packets_received);
+	delta2 = rtt_ms - ping_stats->rtt_avg;
+	ping_stats->rtt_ss += delta * delta2;
+	ping_stats->rtt_mdev = sqrt(ping_stats->rtt_ss / ping_stats->packets_received);
 
-    printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n", length - ip_hdr_len,
-           inet_ntoa(*(struct in_addr *)&ip_hdr->saddr),
-           ntohs(icmp_hdr->un.echo.sequence),
-           ip_hdr->ttl,
-           rtt_ms);
-    return (1);
+	printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n",
+		length - ip_hdr_len,
+		inet_ntoa(*(struct in_addr *)&ip_hdr->saddr),
+		ntohs(icmp_hdr->un.echo.sequence),
+		ip_hdr->ttl,
+		rtt_ms);
+	return (1);
 }
 
 char *icmp_type_to_string(int type)

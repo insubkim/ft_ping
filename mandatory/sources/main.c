@@ -6,7 +6,7 @@
 /*   By: insub <insub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/19 18:06:04 by insub             #+#    #+#             */
-/*   Updated: 2026/01/30 14:17:30 by insub            ###   ########.fr       */
+/*   Updated: 2026/01/30 14:38:18 by insub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,12 @@ int	main(int argc, char **argv)
 	printf("PING %s (%s) 56(84) data bytes\n", argv[arg_index], ip_addr);
 	
 	if (set_socket_timeout(sockfd, 1) < 0)
+	{
+		close(sockfd);
+		return (1);
+	}
+
+	if (set_socket_ttl(sockfd, 1) < 0)
 	{
 		close(sockfd);
 		return (1);

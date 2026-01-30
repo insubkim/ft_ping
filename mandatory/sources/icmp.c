@@ -236,6 +236,7 @@ int	process_icmp_reply(const char *buffer, int length,
 		{
 			ping_stats->packets_sent++;
 			ping_stats->packets_lost++;
+			ping_stats->errors++;
 			if (ping_stats->ping_start_time_ms == 0)
 				ping_stats->ping_start_time_ms = ping_start_time_micro / 1000;
 			return (1);

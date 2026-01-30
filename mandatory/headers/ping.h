@@ -36,6 +36,7 @@ typedef struct s_ping_stats
     unsigned int    packets_sent;
     unsigned int    packets_received;
     unsigned int    packets_lost;
+    unsigned int    errors;
     int64_t         ping_start_time_ms;
     double          rtt_min;
     double          rtt_max;

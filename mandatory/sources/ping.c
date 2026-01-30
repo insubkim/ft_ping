@@ -21,12 +21,21 @@ void print_ping_summary(t_ping_stats ping_stats, char *hostname)
     int64_t milliseconds = get_current_time_micro() / 1000;
 
     printf("\n--- %s ping statistics ---\n", hostname);
-    printf("%u packets transmitted, %u packets received, %.1f%% packet loss, time %lums\n",
-           ping_stats.packets_sent,
-           ping_stats.packets_received,
-           (ping_stats.packets_sent == 0) ? 0.0 :
-           ((ping_stats.packets_lost) * 100.0) / ping_stats.packets_sent,
-           milliseconds - ping_stats.ping_start_time_ms);
+    if (ping_stats.errors > 0)
+        printf("%u packets transmitted, %u packets received, +%u errors, %.1f%% packet loss, time %lums\n",
+               ping_stats.packets_sent,
+               ping_stats.packets_received,
+               ping_stats.errors,
+               (ping_stats.packets_sent == 0) ? 0.0 :
+               ((ping_stats.packets_lost) * 100.0) / ping_stats.packets_sent,
+               milliseconds - ping_stats.ping_start_time_ms);
+    else
+        printf("%u packets transmitted, %u packets received, %.1f%% packet loss, time %lums\n",
+               ping_stats.packets_sent,
+               ping_stats.packets_received,
+               (ping_stats.packets_sent == 0) ? 0.0 :
+               ((ping_stats.packets_lost) * 100.0) / ping_stats.packets_sent,
+               milliseconds - ping_stats.ping_start_time_ms);
     
     if (ping_stats.packets_received == 0)
         return;

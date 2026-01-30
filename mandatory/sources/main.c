@@ -92,9 +92,11 @@ int	main(int argc, char **argv)
 
 	set_signal();
 
-	 while (g_summary_flag == 0)
-	 {
-	    int64_t	ping_start_time_micro;
+	while (g_summary_flag == 0)
+	{
+		int64_t	ping_start_time_micro;
+		int		reply_received;
+
 		ping_start_time_micro = get_current_time_micro();
 
 		if (send_icmp_echo_request(sockfd, ip_addr) < 0)
@@ -102,15 +104,22 @@ int	main(int argc, char **argv)
 			close(sockfd);
 			return (1);
 		}
-		
-		length = receive_icmp_echo_reply(sockfd, reply_buffer, BUFFER_SIZE);
-		if (length < 0)
+
+		reply_received = 0;
+		while (reply_received == 0 && g_summary_flag == 0)
 		{
-			close(sockfd);
-			return (1);
+			length = receive_icmp_echo_reply(sockfd, reply_buffer, BUFFER_SIZE);
+			if (length < 0)
+			{
+				ping_stats.packets_sent++;
+				ping_stats.packets_lost++;
+				if (ping_stats.ping_start_time_ms == 0)
+					ping_stats.ping_start_time_ms = ping_start_time_micro / 1000;
+				break ;
+			}
+			reply_received = process_icmp_reply(reply_buffer, length,
+					&ping_stats, ping_start_time_micro);
 		}
-		
-		process_icmp_reply(reply_buffer, length, &ping_stats, ping_start_time_micro);
 		sleep(1);
 	}
 

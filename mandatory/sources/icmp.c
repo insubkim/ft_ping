@@ -27,6 +27,8 @@
 #define ICMP_HDR_SIZE	8
 #define ICMP_DATA_SIZE	56
 
+static uint16_t	g_sequence = 0;
+
 typedef struct s_icmp_packet
 {
 	struct icmphdr	hdr;
@@ -60,8 +62,8 @@ int		send_icmp_echo_request(int sockfd, const char *ip_addr)
 	memset(&packet, 0, sizeof(packet));
 	packet.hdr.type = ICMP_ECHO;
 	packet.hdr.code = 0;
-	packet.hdr.un.echo.id = getpid() & 0xFFFF;
-	packet.hdr.un.echo.sequence = 0;
+	packet.hdr.un.echo.id = htons(getpid() & 0xFFFF);
+	packet.hdr.un.echo.sequence = htons(g_sequence++);
 	fill_icmp_data(packet.data, ICMP_DATA_SIZE);
 	packet.hdr.checksum = calculate_checksum((unsigned short *)&packet,
 			sizeof(packet));
@@ -88,22 +90,32 @@ int		receive_icmp_echo_reply(int sockfd, char *buffer, int buf_size)
     return ((int)length);
 }
 
-void	process_icmp_reply(const char *buffer, int length, t_ping_stats *ping_stats, int64_t ping_start_time_micro)
+int	process_icmp_reply(const char *buffer, int length, t_ping_stats *ping_stats, int64_t ping_start_time_micro)
 {
     struct iphdr *ip_hdr;
     int ip_hdr_len;
     struct icmphdr *icmp_hdr;
+    uint16_t my_pid;
 
     if ((unsigned int)length < sizeof(struct iphdr) + sizeof(struct icmphdr))
     {
         printf("Received packet is too short\n");
-        return;
+        return (-1);
     }
-    
+
     ip_hdr = (struct iphdr *)buffer;
-    ip_hdr_len = ip_hdr->ihl * 4;  
+    ip_hdr_len = ip_hdr->ihl * 4;
 
     icmp_hdr = (struct icmphdr *)(buffer + ip_hdr_len);
+
+    // Filter: only process ICMP Echo Reply
+    if (icmp_hdr->type != ICMP_ECHOREPLY)
+        return (0);
+
+    // Filter: check if this reply is for our ping (matching PID)
+    my_pid = htons(getpid() & 0xFFFF);
+    if (icmp_hdr->un.echo.id != my_pid)
+        return (0);
 
     int64_t microseconds = get_current_time_micro();
 
@@ -113,39 +125,32 @@ void	process_icmp_reply(const char *buffer, int length, t_ping_stats *ping_stats
         ping_stats->ping_start_time_ms = ping_start_time_micro / 1000;
     }
     ping_stats->packets_sent++;
-    if (icmp_hdr->type == ICMP_ECHOREPLY)
-    {
-        ping_stats->packets_received++;
-        ping_stats->packets_lost = ping_stats->packets_sent - ping_stats->packets_received;
+    ping_stats->packets_received++;
+    ping_stats->packets_lost = ping_stats->packets_sent - ping_stats->packets_received;
 
-        // RTT calculation
-        int64_t rtt = microseconds - ping_start_time_micro;
-        double rtt_ms = rtt / 1000.0;
-        if (ping_stats->rtt_min == 0 || rtt_ms < ping_stats->rtt_min)
-            ping_stats->rtt_min = rtt_ms;
-        if (rtt_ms > ping_stats->rtt_max)
-            ping_stats->rtt_max = rtt_ms;
+    // RTT calculation
+    int64_t rtt = microseconds - ping_start_time_micro;
+    double rtt_ms = rtt / 1000.0;
+    if (ping_stats->rtt_min == 0 || rtt_ms < ping_stats->rtt_min)
+        ping_stats->rtt_min = rtt_ms;
+    if (rtt_ms > ping_stats->rtt_max)
+        ping_stats->rtt_max = rtt_ms;
 
+    // 추가된 표본으로 새로운 평균 계산
+    double delta = rtt_ms - ping_stats->rtt_avg;
+    ping_stats->rtt_avg += delta / ping_stats->packets_received;
 
-        // 추가된 표본으로 새로운 평균 계산
-        double delta = rtt_ms - ping_stats->rtt_avg;
-        ping_stats->rtt_avg += delta / ping_stats->packets_received;
-        
-        // 새로운 평균으로부터 얼마나 떨어져있는지 계산
-        double delta2 = rtt_ms - ping_stats->rtt_avg;
-        ping_stats->rtt_ss += delta * delta2;
-        ping_stats->rtt_mdev = sqrt(ping_stats->rtt_ss / ping_stats->packets_received);    
-    }
-    else
-    {
-        printf("Received non-echo reply ICMP packet\n");
-    }
+    // 새로운 평균으로부터 얼마나 떨어져있는지 계산
+    double delta2 = rtt_ms - ping_stats->rtt_avg;
+    ping_stats->rtt_ss += delta * delta2;
+    ping_stats->rtt_mdev = sqrt(ping_stats->rtt_ss / ping_stats->packets_received);
 
     printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n", length - ip_hdr_len,
            inet_ntoa(*(struct in_addr *)&ip_hdr->saddr),
            ntohs(icmp_hdr->un.echo.sequence),
            ip_hdr->ttl,
-           (microseconds - ping_start_time_micro) / 1000.0);
+           rtt_ms);
+    return (1);
 }
 
 char *icmp_type_to_string(int type)

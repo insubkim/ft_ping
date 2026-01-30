@@ -17,7 +17,7 @@
 
 int		send_icmp_echo_request(int sockfd, const char *ip_addr);
 int		receive_icmp_echo_reply(int sockfd, char *buffer, int buf_size);
-void	process_icmp_reply(const char *buffer, int length, t_ping_stats *ping_stats, int64_t ping_start_time_micro);
+int		process_icmp_reply(const char *buffer, int length, t_ping_stats *ping_stats, int64_t ping_start_time_micro);
 
 unsigned short	calculate_checksum(unsigned short *buf, int len);
 
